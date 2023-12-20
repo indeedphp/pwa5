@@ -1,27 +1,46 @@
-const staticCacheName = 's-app-v9'
+const CACHE = "pwabuilder-page";
 
+// TODO: replace the following with the correct offline fallback page i.e.: const offlineFallbackPage = "offline.html";
 const assetUrls = [
-  'index.html',
+  'index.php',
   'bootstrap.min.css'
 ]
 
-self.addEventListener('install', async event => {
- const cache = await caches.open(staticCacheName)
-  await cache.addAll(assetUrls)
-})
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
 
-self.addEventListener('activate', event => {
-console.log('Service worker acte')
-})
+self.addEventListener('install', async (event) => {
+  event.waitUntil(
+    caches.open(CACHE)
+      .then((cache) => cache.add(assetUrls))
+  );
+});
 
-self.addEventListener('fetch', event => {
-  console.log('fetch', event.request.url)
-  event.respondWith(cacheFirst(event.request))
-})
 
-async function cacheFirst(request){
 
-const cached = await caches.match(request)
-return cached ?? await fetch (request)
-}
+self.addEventListener('fetch', (event) => {
+  if (event.request.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        const preloadResp = await event.preloadResponse;
+
+        if (preloadResp) {
+          return preloadResp;
+        }
+
+        const networkResp = await fetch(event.request);
+        return networkResp;
+      } catch (error) {
+
+        const cache = await caches.open(CACHE);
+        const cachedResp = await cache.match(offlineFallbackPage);
+        return cachedResp;
+      }
+    })());
+  }
+});
+
 

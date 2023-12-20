@@ -17,6 +17,7 @@
 		<link rel="apple-touch-icon" sizes="180x180" href="icon-180x180.png">
 
 		<meta name="theme-color" content="#000000">
+    
 		<link rel="manifest" href="manifest.json">
 		<link href="bootstrap.min.css" rel="stylesheet">
 
@@ -32,9 +33,7 @@
   </div>
   </header>
 
-<script>
-window.addEventListener('load', async () => {navigator.serviceWorker.register('sw.js')})
-</script>
+
 
 <?php
 $db = new PDO('sqlite:pages.sqlite');
